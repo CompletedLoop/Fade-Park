@@ -1,0 +1,33 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local Classes = ServerScriptService.Server.Classes
+local Packets = require(ReplicatedStorage.Shared.Packets)
+
+------------------------------------------------------------------------------------------------------------
+PlayerService = {
+
+	OnStart = function()
+		Players.PlayerAdded:Connect(PlayerService.PlayerAdded)
+		Players.PlayerRemoving:Connect(PlayerService.PlayerRemoving)
+
+		Packets.SamplePing.OnServerInvoke = function() return "Sample" end
+	end;
+
+	PlayerAdded = function(player: Player)
+		--> Get Player Profile
+
+
+	end;
+
+	PlayerRemoving = function(player: Player)
+		
+
+	end;
+
+}
+
+------------------------------------------------------------------------------------------------------------
+
+return PlayerService
