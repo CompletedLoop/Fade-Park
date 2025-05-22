@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 
 local Packets = require(ReplicatedStorage.Shared.Packets)
 
@@ -13,11 +14,11 @@ function CharacterServer.new(player: Player)
 	self.character = player.Character or player.CharacterAdded:Wait()
 
 	--> Check if there is already a CharacterServer Object
-	-- if self.character:HasTag("LoadedCharacter") then
-	-- 	warn(`A CharacterServer Object has already been created for {self.Character.Name}`)
-	-- 	self:destroy()
-	-- 	return
-	-- end
+	if self.character:HasTag("LoadedCharacter") then
+		warn(`A CharacterServer Object has already been created for {self.Character.Name}`)
+		self:destroy()
+		return
+	end
 
 	self:InitializeCharacter()
 
@@ -32,7 +33,9 @@ function CharacterServer:InitializeCharacter()
 	
 	self.character:AddTag("LoadedCharacter")
 
-	-- Packets.CreateCharacterClientObject:FireClient(self.player)
+	if workspace.DEBUG.Value then
+		require(ServerStorage.VisualDelay)(`{self.player.Name}`)
+	end
 end
 
 function CharacterServer:destroy()

@@ -1,5 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local StarterPlayer = game:GetService("StarterPlayer")
+local Ragdoll = require(StarterPlayer.StarterPlayerScripts.Client.ClientModules.Ragdoll)
 
 local player = Players.LocalPlayer
 
@@ -17,11 +19,16 @@ function CharacterClient.new()
 	self.humanoid = self.character:WaitForChild("Humanoid") :: Humanoid
 	self.root = self.character:WaitForChild("HumanoidRootPart") :: Part
 
-	print(`Created CharacterClient Object for {player.Name}`)
+	self:InitializeCharacter()
 
 	RunService.Heartbeat:Connect(function(delta) self:Tick(delta) end)
-
+	
+	print(`Created CharacterClient Object for {player.Name}`)
 	return self
+end
+
+function CharacterClient:InitializeCharacter()
+	-- Ragdoll.new(self.character)
 end
 
 function CharacterClient:Tick(delta: number)
