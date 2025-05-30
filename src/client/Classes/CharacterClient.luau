@@ -1,9 +1,10 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
-local Ragdoll = require(StarterPlayer.StarterPlayerScripts.Client.ClientModules.Ragdoll)
 
 local player = Players.LocalPlayer
+
+local Ragdoll = require(StarterPlayer.StarterPlayerScripts.Client.ClientModules.Ragdoll)
 
 local CharacterClient = {} :: { player: Player, character: Model}
 CharacterClient.__index = CharacterClient
@@ -28,7 +29,7 @@ function CharacterClient.new()
 end
 
 function CharacterClient:InitializeCharacter()
-	-- Ragdoll.new(self.character)
+	Ragdoll.new(self.character)
 end
 
 function CharacterClient:Tick(delta: number)

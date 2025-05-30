@@ -1,7 +1,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local Packets = require(ReplicatedStorage.Shared.Packets)
+local Ragdoll = require(StarterPlayer.StarterPlayerScripts.Client.ClientModules.Ragdoll)
 
 local CharacterServer = {} :: { player: Player, character: Model}
 CharacterServer.__index = CharacterServer
@@ -32,6 +34,8 @@ function CharacterServer:InitializeCharacter()
 	self.character.Parent = workspace.Characters
 	
 	self.character:AddTag("LoadedCharacter")
+
+	Ragdoll.new(self.character)
 
 	if workspace.DEBUG.Value then
 		require(ServerStorage.VisualDelay)(`{self.player.Name}`)
