@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 local Ragdoll = {}
 
 ------------------------------------------------------------------------------------------------------------
-local ATTACHMENT_CFRAMES = { --> Specific positions for each constraint
+ATTACHMENT_CFRAMES = { --> Specific positions for each constraint
 	["Neck"]           = {CFrame.new(0, 1, 0, 0, -1, 0, 1, 0, -0, 0, 0, 1), CFrame.new(0, -0.5, 0, 0, -1, 0, 1, 0, -0, 0, 0, 1)},
 	["Left Shoulder"]  = {CFrame.new(-1.3, 0.75, 0, -1, 0, 0, 0, -1, 0, 0, 0, 1), CFrame.new(0.2, 0.75, 0, -1, 0, 0, 0, -1, 0, 0, 0, 1)},
 	["Right Shoulder"] = {CFrame.new(1.3, 0.75, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), CFrame.new(-0.2, 0.75, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)},
@@ -23,9 +23,14 @@ if game:GetService("RunService"):IsServer() then --> Server Context
 		self.player = Players:GetPlayerFromCharacter(self.character)
 		self.humanoid = CharacterModel:WaitForChild("Humanoid") :: Humanoid
 		self.torso = CharacterModel:WaitForChild("Torso") :: Part
+		self.root = CharacterModel:WaitForChild("HumanoidRootPart") :: Motor6D
+		self.root_joint = self.root:WaitForChild("RootJoint")
 		
 		self.humanoid.BreakJointsOnDeath = false --> We want to Ragdoll on death
 	
+		--> Keep track of the constraints to enable/disable them
+		self.BallSocketConstraints = {}
+
 		--> The Ragdoll attribute is what toggles the Ragdoll
 		--> Last Ragdoll is for tracking how long its been since the last Ragdoll
 		self.character:SetAttribute("Ragdoll", false)
@@ -59,16 +64,40 @@ if game:GetService("RunService"):IsServer() then --> Server Context
 	end
 
 	function Ragdoll:SetRagdollState(to: boolean)
+		print("yo")
 		if to then
 			self.humanoid.AutoRotate = false
 			self.RootWeld.Enabled = true
+			self.root_joint.Enabled = false
 			self.character:SetAttribute("LastRagdoll", os.clock())
+
+			self:_SetMotor6Ds(false)
+			self:_SetBallSocketConstraints(true)
 		else
-			-- if not self.humanoid.Health == 0 then --> Dead characters shouldnt unragdoll
-				self:_resetJoints()
+			--if not self.humanoid.Health == 0 then --> Dead characters shouldnt unragdoll
 				self.humanoid.AutoRotate = true
 				self.RootWeld.Enabled = false
-			-- end
+				self.root_joint.Enabled = true
+
+				self:_SetMotor6Ds(true)
+				self:_SetBallSocketConstraints(false)
+			--end
+		end
+	end
+
+	function Ragdoll:_SetBallSocketConstraints(to: boolean)
+		for _, BallSocket: BallSocketConstraint in self.BallSocketConstraints do
+			if BallSocket then
+				BallSocket.Enabled = to
+			end
+		end
+	end
+
+	function Ragdoll:_SetMotor6Ds(to: boolean)
+		for _, Motor: Motor6D in self.character:GetDescendants() do
+			if Motor:IsA("Motor6D") then
+				Motor.Enabled = to
+			end
 		end
 	end
 
@@ -76,10 +105,7 @@ if game:GetService("RunService"):IsServer() then --> Server Context
 		for _, Motor: Motor6D in self.character:GetDescendants() do
 			--> Checks
 			if     not Motor:IsA("Motor6D")           then continue
-			-- elseif Motor.Name == "RootJoint"          then Motor.Enabled = false continue
 			elseif not ATTACHMENT_CFRAMES[Motor.Name] then continue end
-				
-			-- Motor.Enabled = false
 	
 			local a0, a1 = Instance.new("Attachment"), Instance.new("Attachment")
 			a0.CFrame = ATTACHMENT_CFRAMES[Motor.Name][1]
@@ -90,31 +116,33 @@ if game:GetService("RunService"):IsServer() then --> Server Context
 	
 			self:_createColliderPart(Motor.Part1)
 	
-			local BallSocket = Instance.new("BallSocketConstraint")
-			BallSocket.Attachment0 = a0
-			BallSocket.Attachment1 = a1
-			BallSocket.Enabled = false
-			BallSocket.Name = "RagdollConstraint"
+			local BallSocketConstraint = Instance.new("BallSocketConstraint")
+			BallSocketConstraint.Attachment0 = a0
+			BallSocketConstraint.Attachment1 = a1
+			BallSocketConstraint.Enabled = false
+			BallSocketConstraint.Name = "RagdollConstraint"
+
+			table.insert(self.BallSocketConstraints, BallSocketConstraint)
 	
-			BallSocket.Radius = 0.15
-			BallSocket.LimitsEnabled = true
-			BallSocket.TwistLimitsEnabled = false
-			BallSocket.MaxFrictionTorque = 0
-			BallSocket.Restitution = 0
-			BallSocket.UpperAngle = 90
+			BallSocketConstraint.Radius = 0.15
+			BallSocketConstraint.LimitsEnabled = true
+			BallSocketConstraint.TwistLimitsEnabled = false
+			BallSocketConstraint.MaxFrictionTorque = 0
+			BallSocketConstraint.Restitution = 0
+			BallSocketConstraint.UpperAngle = 90
 			-- BallSocket.TwistLowerAngle = -45
 			-- BallSocket.TwistUpperAngle = 45
 	
 			if Motor.Name == "Neck" then
-				BallSocket.TwistLimitsEnabled = true
-				BallSocket.UpperAngle = 45
-				BallSocket.TwistLowerAngle = -70
-				BallSocket.TwistUpperAngle = 70
+				BallSocketConstraint.TwistLimitsEnabled = true
+				BallSocketConstraint.UpperAngle = 45
+				BallSocketConstraint.TwistLowerAngle = -70
+				BallSocketConstraint.TwistUpperAngle = 70
 			end
 			
 			a0.Parent = Motor.Part0
 			a1.Parent = Motor.Part1
-			BallSocket.Parent = Motor.Parent
+			BallSocketConstraint.Parent = Motor.Parent
 		end
 	end
 
@@ -152,36 +180,24 @@ else --> Client Context
 
 		self.character:GetAttributeChangedSignal("Ragdoll"):Connect(function()
 			self:_updateHumanoidState()
-		end)	
+		end)
 
 		return self
 	end
 
 	function Ragdoll:_updateHumanoidState()
+		print("yo")
 		if self.humanoid.Health == 0 then
 			self.humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
 		else
 			if self:_getRagdollState() then
-				self.humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
-				self.humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
+				self.humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+				-- self.humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
 			else
 				self.humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 			end
 		end
 	end
-end
-
-function Ragdoll:_resetJoints()
-	-- for _, instance: Part | WeldConstraint | BallSocketConstraint | Motor6D in self.character:GetDescendants() do
-	-- 	if instance.Name == "ColliderPart" or
-	-- 	instance.Name == "RagdollWeld" or
-	-- 	instance.Name == "RagdollConstraint" or
-	-- 	instance.Name == "RagdollAttachment" then
-	-- 		instance:Destroy()
-	-- 	elseif instance:IsA("Motor6D") then
-	-- 		instance.Enabled = true
-	-- 	end
-	-- end
 end
 
 function Ragdoll:_getRagdollState(): boolean

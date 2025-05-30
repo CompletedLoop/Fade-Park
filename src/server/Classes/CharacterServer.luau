@@ -3,7 +3,7 @@ local ServerStorage = game:GetService("ServerStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 
 local Packets = require(ReplicatedStorage.Shared.Packets)
-local Ragdoll = require(StarterPlayer.StarterPlayerScripts.Client.ClientModules.Ragdoll)
+local Ragdoll = require(ReplicatedStorage.Shared.Modules.Ragdoll)
 
 local CharacterServer = {} :: { player: Player, character: Model}
 CharacterServer.__index = CharacterServer
