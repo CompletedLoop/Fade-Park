@@ -14,6 +14,7 @@ function CharacterServer.new(player: Player)
 
 	self.player = player
 	self.character = player.Character or player.CharacterAdded:Wait()
+	self.humanoid = self.character:FindFirstChildOfClass("Humanoid")
 
 	--> Check if there is already a CharacterServer Object
 	if self.character:HasTag("LoadedCharacter") then
@@ -25,7 +26,6 @@ function CharacterServer.new(player: Player)
 	self:InitializeCharacter()
 
 	print(`Created CharacterServer Object for {player.Name}`)
-
 	
 	return self
 end
@@ -40,11 +40,6 @@ function CharacterServer:InitializeCharacter()
 	if workspace.DEBUG.Value then
 		require(ServerStorage.VisualDelay)(`{self.player.Name}`)
 	end
-end
-
-function CharacterServer:destroy()
-	self = {}
-	return
 end
 
 ------------------------------------------------------------------------------------------------------------

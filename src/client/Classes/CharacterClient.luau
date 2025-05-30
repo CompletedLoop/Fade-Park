@@ -38,9 +38,6 @@ function CharacterClient:Tick(delta: number)
 	self.humanoid.WalkSpeed = WALK_SPEED
 end
 
-function CharacterClient:destroy()
-	
-end
 
 ------------------------------------------------------------------------------------------------------------
 return CharacterClient

@@ -15,7 +15,7 @@ ATTACHMENT_CFRAMES = { --> Specific positions for each constraint
 
 ------------------------------------------------------------------------------------------------------------
 if game:GetService("RunService"):IsServer() then --> Server Context
-	function Ragdoll.new(CharacterModel: Model, NoRagdollOnDeath: boolean?)
+	function Ragdoll.new(CharacterModel: Model)
 		local self = setmetatable({}, Ragdoll)
 	
 		--> References
@@ -45,12 +45,10 @@ if game:GetService("RunService"):IsServer() then --> Server Context
 		self:_createRagdollConstraints()
 	
 		--> Ragdoll when character dies
-		if not NoRagdollOnDeath then
-			self.humanoid.Died:Once(function()
-				self.character:SetAttribute("Ragdoll", false)
-				self:cleanup()
-			end)
-		end
+		self.humanoid.Died:Once(function()
+			self.character:SetAttribute("Ragdoll", false)
+			self:cleanup()
+		end)
 		
 		--> Welds the Torso and HumanoidRootPart together when ragdolled thanks to Frowning_Loser606
 		self.RootWeld = Instance.new("WeldConstraint")
@@ -64,7 +62,6 @@ if game:GetService("RunService"):IsServer() then --> Server Context
 	end
 
 	function Ragdoll:SetRagdollState(to: boolean)
-		print("yo")
 		if to then
 			self.humanoid.AutoRotate = false
 			self.RootWeld.Enabled = true
@@ -186,7 +183,6 @@ else --> Client Context
 	end
 
 	function Ragdoll:_updateHumanoidState()
-		print("yo")
 		if self.humanoid.Health == 0 then
 			self.humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, false)
 		else
@@ -205,8 +201,7 @@ function Ragdoll:_getRagdollState(): boolean
 end
 
 function Ragdoll:cleanup()
-	self = nil
-	return
+	
 end
 
 ------------------------------------------------------------------------------------------------------------
