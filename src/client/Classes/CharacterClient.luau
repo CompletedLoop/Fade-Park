@@ -30,7 +30,7 @@ function CharacterClient.new()
 end
 
 function CharacterClient:InitializeCharacter()
-	Ragdoll.new(self.character)
+	Ragdoll.Bind(self.character)
 end
 
 function CharacterClient:Tick(delta: number)
