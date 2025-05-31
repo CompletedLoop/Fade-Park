@@ -126,7 +126,9 @@ function Ragdoll:_createRagdollConstraints()
 		BallSocketConstraint.TwistLimitsEnabled = false
 		BallSocketConstraint.MaxFrictionTorque = 0
 		BallSocketConstraint.Restitution = 0
-		BallSocketConstraint.UpperAngle = 90
+		BallSocketConstraint.UpperAngle = 120
+		BallSocketConstraint.TwistLowerAngle = -45
+		BallSocketConstraint.TwistUpperAngle = 45
 
 		if Motor.Name == "Neck" then
 			BallSocketConstraint.TwistLimitsEnabled = true
@@ -147,7 +149,7 @@ function Ragdoll:_createColliderPart(BodyPart: Part)
 	--> Invisible Part that does the colliding
 	local ColliderPart = Instance.new("Part")
 	ColliderPart.Name = "ColliderPart"
-	ColliderPart.Size = BodyPart.Size/1.75
+	ColliderPart.Size = BodyPart.Size/2.7
 	ColliderPart.Massless = true
 	ColliderPart.CFrame = BodyPart.CFrame
 	ColliderPart.Transparency = 1
