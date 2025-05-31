@@ -185,7 +185,16 @@ function Ragdoll.Bind(character: Model) --> If the character is a player then th
 
 	Ragdoll.BindToRagdoll(character, function(value)
 		Ragdoll.UpdateHumanoidState(humanoid, value)
+
+		if value then
+			Ragdoll.ApplyForce(character)
+		end
 	end)
+end
+
+function Ragdoll.ApplyForce(character: Model)
+	local head = character:FindFirstChild("Head") :: Part
+	head:ApplyImpulse((head.CFrame.LookVector * Random.new():NextUnitVector()) * 300)
 end
 
 function Ragdoll.UpdateHumanoidState(humanoid: Humanoid, to: boolean)

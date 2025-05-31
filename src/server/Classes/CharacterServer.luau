@@ -6,7 +6,6 @@ local Packets = require(ReplicatedStorage.Shared.Packets)
 local Ragdoll = require(ReplicatedStorage.Shared.Modules.Ragdoll)
 
 local CharacterServer = {} :: { player: Player, character: Model}
-CharacterServer.__index = CharacterServer
 
 ------------------------------------------------------------------------------------------------------------
 function CharacterServer.new(player: Player)
@@ -26,13 +25,13 @@ function CharacterServer.new(player: Player)
 	self:InitializeCharacter()
 
 	print(`Created CharacterServer Object for {player.Name}`)
-	
+
 	return self
 end
 
 function CharacterServer:InitializeCharacter()
 	self.character.Parent = workspace.Characters
-	
+
 	self.character:AddTag("LoadedCharacter")
 
 	Ragdoll.new(self.character)
@@ -43,4 +42,5 @@ function CharacterServer:InitializeCharacter()
 end
 
 ------------------------------------------------------------------------------------------------------------
+CharacterServer.__index = CharacterServer
 return CharacterServer

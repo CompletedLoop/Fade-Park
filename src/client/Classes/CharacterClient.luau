@@ -3,12 +3,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterPlayer = game:GetService("StarterPlayer")
 
+local CharacterClient = {} :: { player: Player, character: Model}
+
 local player = Players.LocalPlayer
 
 local Ragdoll = require(ReplicatedStorage.Shared.Modules.Ragdoll)
-
-local CharacterClient = {} :: { player: Player, character: Model}
-CharacterClient.__index = CharacterClient
 
 local WALK_SPEED = 12.5
 
@@ -38,6 +37,6 @@ function CharacterClient:Tick(delta: number)
 	self.humanoid.WalkSpeed = WALK_SPEED
 end
 
-
 ------------------------------------------------------------------------------------------------------------
+CharacterClient.__index = CharacterClient
 return CharacterClient
