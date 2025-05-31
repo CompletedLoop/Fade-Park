@@ -4,11 +4,11 @@ local Ragdoll = {}
 
 ------------------------------------------------------------------------------------------------------------
 ATTACHMENT_CFRAMES = { --> Specific positions for each constraint
-	["Neck"]           = {CFrame.new(0, 1, 0, 0, -1, 0, 1, 0, -0, 0, 0, 1), CFrame.new(0, -0.5, 0, 0, -1, 0, 1, 0, -0, 0, 0, 1)},
-	["Left Shoulder"]  = {CFrame.new(-1.3, 0.75, 0, -1, 0, 0, 0, -1, 0, 0, 0, 1), CFrame.new(0.2, 0.75, 0, -1, 0, 0, 0, -1, 0, 0, 0, 1)},
-	["Right Shoulder"] = {CFrame.new(1.3, 0.75, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1), CFrame.new(-0.2, 0.75, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1)},
-	["Left Hip"]       = {CFrame.new(-0.5, -1, 0, 0, 1, -0, -1, 0, 0, 0, 0, 1), CFrame.new(0, 1, 0, 0, 1, -0, -1, 0, 0, 0, 0, 1)},
-	["Right Hip"]      = {CFrame.new(0.5, -1, 0, 0, 1, -0, -1, 0, 0, 0, 0, 1), CFrame.new(0, 1, 0, 0, 1, -0, -1, 0, 0, 0, 0, 1)},
+	["Neck"]           = { CFrame.new(0, 1, 0)      , CFrame.new(0, -0.5, 0)    },
+	["Left Shoulder"]  = { CFrame.new(-1.3, 0.75, 0), CFrame.new(0.2, 0.75, 0)  },
+	["Right Shoulder"] = { CFrame.new(1.3, 0.75, 0) , CFrame.new(-0.2, 0.75, 0) },
+	["Left Hip"]       = { CFrame.new(-0.5, -1, 0)  , CFrame.new(0, 1, 0)       },
+	["Right Hip"]      = { CFrame.new(0.5, -1, 0)   , CFrame.new(0, 1, 0)       },
 }
 
 ------------------------------------------------------------------------------------------------------------
@@ -37,9 +37,9 @@ function Ragdoll.new(CharacterModel: Model)
 		self:_setRagdollState(value)
 	end)
 
-	--> NPC
+	--> Automatically determine if the character is a NPC
 	if not game:GetService("Players"):GetPlayerFromCharacter(CharacterModel) then
-		Ragdoll.Bind(CharacterModel)
+		Ragdoll.Bind(CharacterModel) --> Update the humanoid state on the server if npc
 	end
 
 	--> Create Ragdoll Constraints
@@ -84,9 +84,14 @@ end
 
 function Ragdoll:_setBallSocketConstraints(to: boolean)
 	for _, BallSocket: BallSocketConstraint in self.BallSocketConstraints do
-		if BallSocket then
-			BallSocket.Enabled = to
-		end
+		if not BallSocket then continue end
+			
+		--> Update attachments according to character scale
+		local AttachmentCFrame = ATTACHMENT_CFRAMES[BallSocket:GetAttribute("Motor")]
+		BallSocket.Attachment0.CFrame = CFrame.new(AttachmentCFrame[1].Position * self.character:GetScale())
+		BallSocket.Attachment1.CFrame = CFrame.new(AttachmentCFrame[2].Position * self.character:GetScale())
+
+		BallSocket.Enabled = to
 	end
 end
 
@@ -119,6 +124,8 @@ function Ragdoll:_createRagdollConstraints()
 		BallSocketConstraint.Enabled = false
 		BallSocketConstraint.Name = "RagdollConstraint"
 
+		BallSocketConstraint:SetAttribute("Motor", Motor.Name)
+
 		table.insert(self.BallSocketConstraints, BallSocketConstraint)
 
 		BallSocketConstraint.Radius = 0.15
@@ -143,13 +150,13 @@ function Ragdoll:_createRagdollConstraints()
 	end
 end
 
-function Ragdoll:_createColliderPart(BodyPart: Part)
+function Ragdoll:_createColliderPart(BodyPart: Part) --> Prevents limbs from clipping through the character
 	if not BodyPart:IsDescendantOf(workspace) then return end
 
 	--> Invisible Part that does the colliding
 	local ColliderPart = Instance.new("Part")
 	ColliderPart.Name = "ColliderPart"
-	ColliderPart.Size = BodyPart.Size/2.7
+	ColliderPart.Size = BodyPart.Size/1.7
 	ColliderPart.Massless = true
 	ColliderPart.CFrame = BodyPart.CFrame
 	ColliderPart.Transparency = 1
