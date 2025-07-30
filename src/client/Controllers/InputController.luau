@@ -1,3 +1,4 @@
+local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -10,9 +11,14 @@ local playerScripts = player.PlayerScripts
 ------------------------------------------------------------------------------------------------------------
 InputController = {
 	OnStart = function()
-		playerScripts:WaitForChild("Inputs").Ragdoll.Pressed:Connect(function()
-			Packets.Ragdoll:Fire()
-		end)
+		ContextActionService:BindAction("Ragdoll", function(action, state)
+			if state == Enum.UserInputState.Begin then
+				Packets.Ragdoll:Fire()
+			end
+		end, true, Enum.KeyCode.R)
+
+		-- playerScripts:WaitForChild("Inputs").Ragdoll.Pressed:Connect(function()
+		-- end)
 	end;
 
 	OnTick = function(delta: number)

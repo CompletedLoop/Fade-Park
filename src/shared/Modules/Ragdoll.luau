@@ -132,17 +132,17 @@ function Ragdoll:_createRagdollConstraints()
 		BallSocketConstraint.LimitsEnabled = true
 		BallSocketConstraint.TwistLimitsEnabled = false
 		BallSocketConstraint.MaxFrictionTorque = 0
-		BallSocketConstraint.Restitution = 0
-		BallSocketConstraint.UpperAngle = 120
-		BallSocketConstraint.TwistLowerAngle = -45
-		BallSocketConstraint.TwistUpperAngle = 45
+		BallSocketConstraint.Restitution = 0.25
+		BallSocketConstraint.UpperAngle = 90
+		-- BallSocketConstraint.TwistLowerAngle = -45
+		-- BallSocketConstraint.TwistUpperAngle = 45
 
-		if Motor.Name == "Neck" then
-			BallSocketConstraint.TwistLimitsEnabled = true
-			BallSocketConstraint.UpperAngle = 45
-			BallSocketConstraint.TwistLowerAngle = -70
-			BallSocketConstraint.TwistUpperAngle = 70
-		end
+		-- if Motor.Name == "Neck" then
+		-- 	BallSocketConstraint.TwistLimitsEnabled = true
+		-- 	BallSocketConstraint.UpperAngle = 65
+		-- 	BallSocketConstraint.TwistLowerAngle = -60
+		-- 	BallSocketConstraint.TwistUpperAngle = 60
+		-- end
 
 		a0.Parent = Motor.Part0
 		a1.Parent = Motor.Part1
@@ -156,7 +156,7 @@ function Ragdoll:_createColliderPart(BodyPart: Part) --> Prevents limbs from cli
 	--> Invisible Part that does the colliding
 	local ColliderPart = Instance.new("Part")
 	ColliderPart.Name = "ColliderPart"
-	ColliderPart.Size = BodyPart.Size/1.7
+	ColliderPart.Size = BodyPart.Size/2.1
 	ColliderPart.Massless = true
 	ColliderPart.CFrame = BodyPart.CFrame
 	ColliderPart.Transparency = 1
@@ -194,7 +194,9 @@ end
 
 function Ragdoll.ApplyForce(character: Model)
 	local head = character:FindFirstChild("Head") :: Part
-	head:ApplyImpulse((head.CFrame.LookVector * Random.new():NextUnitVector()) * 300)
+	if head then
+		head:ApplyImpulse((head.CFrame.LookVector * Random.new():NextUnitVector()) * 300)
+	end
 end
 
 function Ragdoll.UpdateHumanoidState(humanoid: Humanoid, to: boolean)
